@@ -2,6 +2,10 @@ import google_auth_oauthlib.flow
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
+import io
+import sys
+import shutil
  
 class Auth:
     def __init__(self, client_secret_filename, scopes):
@@ -25,3 +29,28 @@ CLIENT_SECRET_FILE = "credentials.json"
 credentials = Auth(client_secret_filename=CLIENT_SECRET_FILE, scopes=SCOPES).get_credentials()
  
 drive_service = build('drive', 'v3', credentials=credentials)
+
+'''
+print('hi')
+
+request = drive_service.files().list().execute()
+print(request)
+
+print('hello world')
+
+sys.exit(1)
+'''
+
+request = drive_service.files().export(fileId='1msTothwvq8dXCsV6cmhaZhYNQiYu6zWT1aLG5iUF_HI', mimeType='application/pdf')
+
+fh = io.BytesIO()
+downloader = MediaIoBaseDownload(fh, request)
+done = False
+while done is False:
+    status, done = downloader.next_chunk()
+    print("Download %d%%" % int(status.progress() * 100))
+
+# The file has been downloaded into RAM, now save it in a file
+fh.seek(0)
+with open('your_filename.pdf', 'wb') as f:
+    shutil.copyfileobj(fh, f, length=131072)
