@@ -36,19 +36,24 @@ def main():
     if action == "once":
         source, destination = sys.argv[2], sys.argv[3]
         sync_once(source, destination)
+        print(f"Done! Synced '{source}' with '{destination}'")
     elif action == "start":
         if sys.argv[2] == "--foreground":
             source, destination = sys.argv[3], sys.argv[4]
             start_syncing(source, destination)
         else:
-            subprocess.Popen([sys.executable, __file__, "start", "--foreground", *sys.argv[2:]])
+            source, destination = sys.argv[2], sys.argv[3]
+            print(f"Starting background process to sync '{source}' with '{destination}'...")
+            subprocess.Popen([sys.executable, __file__, "start", "--foreground", source, destination])
             sys.exit(0)
     elif action == "stop":
         if sys.argv[2] == "--foreground":
             source, destination = sys.argv[3], sys.argv[4]
             stop_syncing(source, destination)
         else:
-            subprocess.Popen([sys.executable, __file__, "stop", "--foreground", *sys.argv[2:]])
+            source, destination = sys.argv[2], sys.argv[3]
+            print(f"Stopping background process to sync '{source}' with '{destination}'...")
+            subprocess.Popen([sys.executable, __file__, "stop", "--foreground", source, destination])
             sys.exit(0)
 
 if __name__ == "__main__":
