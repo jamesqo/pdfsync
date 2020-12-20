@@ -20,12 +20,13 @@ def start_syncing(source, destination):
 
     ### Add the entry to the startup file
 
-    with open(STARTUP_FILE, "rw", encoding="utf8") as file:
+    with open(STARTUP_FILE, "r+", encoding="utf8") as file:
         to_sync = json.load(file)
         if source not in to_sync:
             to_sync[source] = [destination]
         elif destination not in to_sync[source]:
             to_sync[source] = sorted(to_sync[source] + [destination])
+        file.truncate(0)
         json.dump(to_sync, file)
     
     ### Sync once immediately

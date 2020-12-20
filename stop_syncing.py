@@ -10,7 +10,7 @@ def stop_syncing(source, destination):
     ### Remove the entry from the startup file
 
     if os.path.isfile(STARTUP_FILE):
-        with open(STARTUP_FILE, "rw", encoding="utf8") as file:
+        with open(STARTUP_FILE, "r+", encoding="utf8") as file:
             to_sync = json.load(file)
             if destination in to_sync[source]:
                 to_sync[source].remove(destination)

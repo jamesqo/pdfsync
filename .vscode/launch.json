@@ -5,10 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "pdfsync",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceRoot}/pdfsync.py",
+            "args": [
+                // Replace with your own document
+                "once", "Anime Recs", "recs.pdf"
+            ],
             "console": "integratedTerminal"
         }
     ]

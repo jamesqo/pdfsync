@@ -17,7 +17,7 @@ CREDS_FILE = "credentials.json"
 USER_CREDS_FILE = os.path.join(DATA_DIR, "user_credentials.json")
 
 def load_user_creds():
-    with open(USER_CREDS_FILE, "rb", encoding="utf8") as file:
+    with open(USER_CREDS_FILE, "r", encoding="utf8") as file:
         creds_data = json.load(file)
         cred = Credentials(
             token=creds_data['token'],
@@ -30,7 +30,7 @@ def load_user_creds():
     return cred
 
 def save_user_creds(user_creds):
-    with open(USER_CREDS_FILE, "rw", encoding="utf8") as file:
+    with open(USER_CREDS_FILE, "w", encoding="utf8") as file:
         creds_data = {
             "token": user_creds.token,
             "refresh_token": user_creds.refresh_token,
@@ -46,12 +46,12 @@ def get_fileid_from_path(drive_service, doc_path):
     # Implements method described here: https://stackoverflow.com/a/40998881/4077294
 
     parts = doc_path.split('/')
-    folders, filename = doc_path[:-1], doc_path[-1]
+    folders, filename = parts[:-1], parts[-1]
     parent_id = None
 
     # cd thru all the folders
     for folder in folders:
-        query = "title = '%s' and mimeType = '%s'" % (folder, "application/vnd.google-apps.folder")
+        query = "name = '%s' and mimeType = '%s'" % (folder, "application/vnd.google-apps.folder")
         if parent_id:
             query += " and '%s' in parents" % (parent_id,)
         parent_contents = drive_service.files().list(q=query).execute()
@@ -59,11 +59,11 @@ def get_fileid_from_path(drive_service, doc_path):
         parent_id = folder_id
     
     # Now look for the file
-    query = "title = '%s'" % (filename,)
+    query = "name = '%s'" % (filename,)
     if parent_id:
         query += " and '%s' in parents" % (parent_id,)
     parent_contents = drive_service.files().list(q=query).execute()
-    return parent_contents['items'][0]['id']
+    return parent_contents['files'][0]['id']
 
 def sync_once(source, destination):
     if not destination.endswith(".pdf"):
@@ -86,7 +86,7 @@ def sync_once(source, destination):
 
     ### Use it to export the file
 
-    source_id = get_fileid_from_path(source)
+    source_id = get_fileid_from_path(drive_service, source)
     request = drive_service.files().export(fileId=source_id, mimeType='application/pdf')
 
     # Download the file into memory
@@ -99,6 +99,6 @@ def sync_once(source, destination):
 
     # Transfer the file from memory to disk
     fh.seek(0)
-    os.makedirs(os.path.dirname(destination), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.abspath(destination)), exist_ok=True)
     with open(destination, 'wb') as f:
         shutil.copyfileobj(fh, f, length=131072)
