@@ -40,6 +40,7 @@ def start_syncing(source, destination):
     # TODO: Make use of the APIs at
     # - https://developers.google.com/drive/api/v3/reference/changes/watch
     # - https://developers.google.com/drive/api/v3/push
+    # to get notified every time a doc changes
 
     while True:
         time.sleep(60*60)
