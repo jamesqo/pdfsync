@@ -102,3 +102,5 @@ def sync_once(source, destination):
     os.makedirs(os.path.dirname(os.path.abspath(destination)), exist_ok=True)
     with open(destination, 'wb') as f:
         shutil.copyfileobj(fh, f, length=131072)
+    
+    print(f"Done! Synced {source} with {destination}")
