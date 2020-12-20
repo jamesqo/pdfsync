@@ -1,6 +1,7 @@
 import os
 import platform
 import shutil
+import subprocess
 import sys
 
 from start_syncing import start_syncing
@@ -27,18 +28,28 @@ def main():
     if len(sys.argv) < 4:
         print("usage: pdfsync <once|start|stop> <args>")
         print("pdfsync once <source> <destination>")
-        print("pdfsync start <source> <destination>")
-        print("pdfsync stop <source> <destination>")
+        print("pdfsync start [--foreground] <source> <destination>")
+        print("pdfsync stop [--foreground] <source> <destination>")
         sys.exit(1)
     
     action = sys.argv[1]
-    source, destination = sys.argv[2], sys.argv[3]
     if action == "once":
+        source, destination = sys.argv[2], sys.argv[3]
         sync_once(source, destination)
     elif action == "start":
-        start_syncing(source, destination) # TODO: in the background
+        if sys.argv[2] == "--foreground":
+            source, destination = sys.argv[3], sys.argv[4]
+            start_syncing(source, destination)
+        else:
+            subprocess.Popen([sys.executable, __file__, "start", "--foreground", *sys.argv[2:]])
+            sys.exit(0)
     elif action == "stop":
-        stop_syncing(source, destination) # TODO: in the background
+        if sys.argv[2] == "--foreground":
+            source, destination = sys.argv[3], sys.argv[4]
+            stop_syncing(source, destination)
+        else:
+            subprocess.Popen([sys.executable, __file__, "stop", "--foreground", *sys.argv[2:]])
+            sys.exit(0)
 
 if __name__ == "__main__":
     main()
