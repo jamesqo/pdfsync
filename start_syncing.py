@@ -6,10 +6,12 @@ import sys
 
 from sync_once import sync_once
 
-DATA_DIR = ...
-STARTUP_FILE = ...
+DATA_DIR = os.path.expanduser("~/.pdfsync")
+STARTUP_FILE = os.path.join(DATA_DIR, "to_sync.json")
 
 def start_syncing(source, destination):
+    if not destination.endswith(".pdf"):
+        raise Exception("destination must be a pdf file")
 
     ### Create the startup file if it doesn't exist
 
@@ -26,6 +28,7 @@ def start_syncing(source, destination):
             to_sync[source] = [destination]
         elif destination not in to_sync[source]:
             to_sync[source] = sorted(to_sync[source] + [destination])
+        file.seek(0)
         file.truncate(0)
         json.dump(to_sync, file)
     

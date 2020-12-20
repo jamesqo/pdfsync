@@ -11,7 +11,7 @@
             "program": "${workspaceRoot}/pdfsync.py",
             "args": [
                 // Replace with your own document
-                "once", "Anime Recs", "recs.pdf"
+                "start", "Anime Recs", "recs.pdf"
             ],
             "console": "integratedTerminal"
         }

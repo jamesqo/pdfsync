@@ -6,6 +6,8 @@ DATA_DIR = os.path.expanduser("~/.pdfsync")
 STARTUP_FILE = os.path.join(DATA_DIR, "to_sync.json")
 
 def stop_syncing(source, destination):
+    if not destination.endswith(".pdf"):
+        raise Exception("destination must be a pdf file")
 
     ### Remove the entry from the startup file
 
@@ -14,6 +16,9 @@ def stop_syncing(source, destination):
             to_sync = json.load(file)
             if destination in to_sync[source]:
                 to_sync[source].remove(destination)
+                if len(to_sync[source]) == 0:
+                    del to_sync[source]
+                file.seek(0)
                 file.truncate(0)
                 json.dump(to_sync, file)
 
