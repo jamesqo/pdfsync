@@ -41,11 +41,29 @@ def save_user_creds(user_creds):
         }
         json.dump(creds_data, file)
 
-'''
-def get_fileid_from_path(doc_path):
-    ### TODO: Given the path to the Google Doc, find the id for it
-    pass
-'''
+def get_fileid_from_path(drive_service, doc_path):
+    ### Given the path to the Google Doc, finds the id for it
+    # Implements method described here: https://stackoverflow.com/a/40998881/4077294
+
+    parts = doc_path.split('/')
+    folders, filename = doc_path[:-1], doc_path[-1]
+    parent_id = None
+
+    # cd thru all the folders
+    for folder in folders:
+        query = "title = '%s' and mimeType = '%s'" % (folder, "application/vnd.google-apps.folder")
+        if parent_id:
+            query += " and '%s' in parents" % (parent_id,)
+        parent_contents = drive_service.files().list(q=query).execute()
+        folder_id = parent_contents['items'][0]['id']
+        parent_id = folder_id
+    
+    # Now look for the file
+    query = "title = '%s'" % (filename,)
+    if parent_id:
+        query += " and '%s' in parents" % (parent_id,)
+    parent_contents = drive_service.files().list(q=query).execute()
+    return parent_contents['items'][0]['id']
 
 def sync_once(source, destination):
     if not destination.endswith(".pdf"):
@@ -68,8 +86,7 @@ def sync_once(source, destination):
 
     ### Use it to export the file
 
-    #source_id = get_fileid_from_path(source)
-    source_id = source
+    source_id = get_fileid_from_path(source)
     request = drive_service.files().export(fileId=source_id, mimeType='application/pdf')
 
     # Download the file into memory
