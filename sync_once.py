@@ -15,12 +15,23 @@ CREDS_FILE = "credentials.json"
 USER_CREDS_FILE = os.path.join(DATA_DIR, "user_credentials.json")
 
 def load_user_creds():
-    ### TODO: Load from USER_CREDS_FILE
-    pass
+    ### Load from USER_CREDS_FILE
+    with open(USER_CREDS_FILE, "rb") as file:
+    creds_data = json.load(file)
+    cred = Credentials( token=creds_data['token'], refresh_token=creds_data['refresh_token'], token_uri=creds_data['token_uri'], client_id=creds_data['client_id'], client_secret=creds_data['client_secret'], scopes=creds_data['scopes'] )
+    return cred
 
 def save_user_creds(user_creds):
-    ### TODO: Save to USER_CREDS_FILE
-    pass
+    with open( USER_CREDS_FILE, "rw" ) as file :
+        creds_data = {
+            "token": user_creds.token,
+            "refresh_token": user_creds.refresh_token,
+            "token_uri": user_creds.token_uri,
+            "client_id": user_creds.client_id,
+            "client_secret": user_creds.client_secret,
+            "scopes": user_creds.scopes,
+            }
+        json.dump(file, creds_data)
 
 def get_fileid_from_path(doc_path):
     ### TODO: Given the path to the Google Doc, find the id for it
