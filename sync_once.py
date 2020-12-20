@@ -1,10 +1,12 @@
-import os
 import io
-import sys
+import json
+import os
 import shutil
+import sys
 
 import google_auth_oauthlib.flow
 from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -15,14 +17,20 @@ CREDS_FILE = "credentials.json"
 USER_CREDS_FILE = os.path.join(DATA_DIR, "user_credentials.json")
 
 def load_user_creds():
-    ### Load from USER_CREDS_FILE
-    with open(USER_CREDS_FILE, "rb") as file:
+    with open(USER_CREDS_FILE, "rb", encoding="utf8") as file:
         creds_data = json.load(file)
-        cred = Credentials( token=creds_data['token'], refresh_token=creds_data['refresh_token'], token_uri=creds_data['token_uri'], client_id=creds_data['client_id'], client_secret=creds_data['client_secret'], scopes=creds_data['scopes'] )
+        cred = Credentials(
+            token=creds_data['token'],
+            refresh_token=creds_data['refresh_token'],
+            token_uri=creds_data['token_uri'],
+            client_id=creds_data['client_id'],
+            client_secret=creds_data['client_secret'],
+            scopes=creds_data['scopes']
+        )
     return cred
 
 def save_user_creds(user_creds):
-    with open( USER_CREDS_FILE, "rw" ) as file :
+    with open(USER_CREDS_FILE, "rw", encoding="utf8") as file:
         creds_data = {
             "token": user_creds.token,
             "refresh_token": user_creds.refresh_token,
@@ -30,8 +38,8 @@ def save_user_creds(user_creds):
             "client_id": user_creds.client_id,
             "client_secret": user_creds.client_secret,
             "scopes": user_creds.scopes,
-            }
-        json.dump(file, creds_data)
+        }
+        json.dump(creds_data, file)
 
 '''
 def get_fileid_from_path(doc_path):
@@ -39,19 +47,9 @@ def get_fileid_from_path(doc_path):
     pass
 '''
 
-def main():
-    ### Parse arguments from command line
-
-    if len(sys.argv) < 3:
-        print("usage: sync_once <source> <destination>")
-        sys.exit(1)
-    
-    source = sys.argv[1]
-    destination = sys.argv[2]
-
+def sync_once(source, destination):
     if not destination.endswith(".pdf"):
-        print("destination must be a pdf file")
-        sys.exit(1)
+        raise Exception("destination must be a pdf file")
 
     ### Get the credentials
     
@@ -84,9 +82,6 @@ def main():
 
     # Transfer the file from memory to disk
     fh.seek(0)
-    os.path.makedirs(os.path.dirname(destination), exist_ok=True)
+    os.makedirs(os.path.dirname(destination), exist_ok=True)
     with open(destination, 'wb') as f:
         shutil.copyfileobj(fh, f, length=131072)
-
-if __name__ == "__main__":
-    main()
