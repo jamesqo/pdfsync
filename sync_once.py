@@ -22,15 +22,17 @@ def save_user_creds(user_creds):
     ### TODO: Save to USER_CREDS_FILE
     pass
 
+'''
 def get_fileid_from_path(doc_path):
     ### TODO: Given the path to the Google Doc, find the id for it
     pass
+'''
 
 def main():
     ### Parse arguments from command line
 
     if len(sys.argv) < 3:
-        print("usage: sync_once [source] [destination]")
+        print("usage: sync_once <source> <destination>")
         sys.exit(1)
     
     source = sys.argv[1]
@@ -47,6 +49,7 @@ def main():
     else:
         flow = InstalledAppFlow.from_client_secrets_file(CREDS_FILE, SCOPES)
         user_creds = flow.run_local_server(port=8080)
+
         os.makedirs(DATA_DIR, exist_ok=True)
         save_user_creds(user_creds)
     
@@ -56,11 +59,11 @@ def main():
 
     ### Use it to export the file
 
-    # Download the file into memory
-
-    source_id = get_fileid_from_path(source)
+    #source_id = get_fileid_from_path(source)
+    source_id = source
     request = drive_service.files().export(fileId=source_id, mimeType='application/pdf')
 
+    # Download the file into memory
     fh = io.BytesIO()
     downloader = MediaIoBaseDownload(fh, request)
     done = False
@@ -69,7 +72,6 @@ def main():
         print("Download %d%%" % int(status.progress() * 100))
 
     # Transfer the file from memory to disk
-
     fh.seek(0)
     os.path.makedirs(os.path.dirname(destination), exist_ok=True)
     with open(destination, 'wb') as f:
